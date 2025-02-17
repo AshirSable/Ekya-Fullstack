@@ -1,59 +1,40 @@
 const express = require("express");
 const cors = require("cors");
+const bodyParser = require("body-parser");
+
+const db = require("./app/models"); // Sequelize models
+const authRoutes = require("./app/routes/auth.routes");  // Correct import
+const userRoutes = require("./app/routes/user.routes");  // Correct import
 
 const app = express();
 
-var corsOptions = {
-  origin: "http://localhost:8081"
-};
+// CORS setup for React frontend (Change this if deployed)
+// const corsOptions = {
+//   origin: "http://localhost:3000", // React runs on port 3000
+//   credentials: true,
+// };
 
-app.use(cors(corsOptions));
+app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-// parse requests of content-type - application/json
-app.use(express.json());
-
-// parse requests of content-type - application/x-www-form-urlencoded
-app.use(express.urlencoded({ extended: true }));
-
-// database
-const db = require("./app/models");
-const Role = db.role;
-
-// db.sequelize.sync();
-// force: true will drop the table if it already exists
-db.sequelize.sync({force: true}).then(() => {
-  console.log('Drop and Resync Database with { force: true }');
-  initial();
+// Sync DB
+db.sequelize.sync().then(() => {
+  console.log("✅ Database connected successfully.");
+}).catch((err) => {
+  console.error("❌ Database connection error:", err);
 });
 
-// simple route
+// Routes
+app.use("/api/auth", authRoutes);  // Correct use of authRoutes
+app.use("/api/user", userRoutes);  // Correct use of userRoutes
+
+// Test route
 app.get("/", (req, res) => {
-  res.json({ message: "Welcome to bezkoder application." });
+  res.json({ message: "Welcome to the Ekya API!" });
 });
 
-// routes
-require('./app/routes/auth.routes')(app);
-require('./app/routes/user.routes')(app);
-
-// set port, listen for requests
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}.`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
-
-function initial() {
-  Role.create({
-    id: 1,
-    name: "user"
-  });
- 
-  Role.create({
-    id: 2,
-    name: "moderator"
-  });
- 
-  Role.create({
-    id: 3,
-    name: "admin"
-  });
-}
