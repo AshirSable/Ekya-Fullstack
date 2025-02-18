@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import Explorenav from "../components/loginnav";
 import { FaPlusCircle } from "react-icons/fa";
 import CollaborationForm from "../components/addcollabform";
+import axios from "axios";
 
 const AddCollab = () => {
   const [showForm, setShowForm] = useState(false);
   const [collaborations, setCollaborations] = useState([]);
-  
+
   const token = localStorage.getItem("token");
   const userId = localStorage.getItem("userId"); // Ensure userId is stored during login
 
@@ -14,7 +15,7 @@ const AddCollab = () => {
   useEffect(() => {
     const fetchCollaborations = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/api/collaborations/user/${userId}`, {
+        const response = await fetch(`http://localhost:8000/api/collaborations/user/${userId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -37,22 +38,20 @@ const AddCollab = () => {
   // Handle form submission and store data in database
   const handleTitleUpdate = async (title, revenueShared, timePeriod) => {
     setShowForm(false);
-
+    const token = localStorage.getItem("token")
     try {
-      const response = await fetch("http://localhost:8080/api/collaborations/create", {
-        method: "POST",
+      const response = await axios.post("http://localhost:8000/api/collaboration/create", {
+        title: title,
+        revenueShared: revenueShared,
+        timePeriod: timePeriod
+      }, {
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          title,
-          revenueShared,
-          timePeriod,
-        }),
+          "Content-Type": "application/json"
+        }
       });
 
-      const data = await response.json();
+      const data = await response.data;
       if (response.ok) {
         setCollaborations([...collaborations, data.collaboration]);
       } else {
@@ -93,11 +92,11 @@ const AddCollab = () => {
                     <div className="flex flex-row justify-between items-center">
                       <div className="flex flex-row">
                         <p className="text-sm mb-2 pr-14 text-gray-700">
-                          Revenue Shared: 
+                          Revenue Shared:
                           <span className="text-black font-semibold pl-2">{collab.revenueShared}</span>
                         </p>
                         <p className="text-sm mb-2 text-gray-700">
-                          Time Period: 
+                          Time Period:
                           <span className="text-black font-semibold pl-2">{collab.timePeriod}</span>
                         </p>
                       </div>

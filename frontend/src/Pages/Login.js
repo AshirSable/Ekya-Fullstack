@@ -12,7 +12,7 @@ export default function Login() {
   const handleLogin = async () => {
     try {
       const response = await axios.post('http://localhost:8000/api/auth/signin', {
-        username: email,  // Assuming backend expects "username" (use email here)
+        email: email,  // Assuming backend expects "username" (use email here)
         password
       });
 
