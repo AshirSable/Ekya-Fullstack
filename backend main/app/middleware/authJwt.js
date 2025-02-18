@@ -4,7 +4,7 @@ const db = require("../models");
 const User = db.user;
 
 verifyToken = (req, res, next) => {
-  let token = req.headers["x-access-token"];
+  let token = req.headers?.Authorization;
 
   if (!token) {
     return res.status(403).send({
@@ -12,17 +12,19 @@ verifyToken = (req, res, next) => {
     });
   }
 
-  jwt.verify(token,
-            config.secret,
-            (err, decoded) => {
-              if (err) {
-                return res.status(401).send({
-                  message: "Unauthorized!",
-                });
-              }
-              req.userId = decoded.id;
-              next();
-            });
+  const extracted_token = token.split("Bearer ")[0]
+
+  jwt.verify(extracted_token,
+    config.secret,
+    (err, decoded) => {
+      if (err) {
+        return res.status(401).send({
+          message: "Unauthorized!",
+        });
+      }
+      req.userId = decoded.id;
+      next();
+    });
 };
 
 isAdmin = (req, res, next) => {
