@@ -1,12 +1,17 @@
+const authConfig = require("../config/auth.config");
 const db = require("../models");
 const Collaboration = db.collaboration;
+const jwt = require("jsonwebtoken")
 
 // Create a new collaboration
 exports.createCollaboration = async (req, res) => {
   try {
     const { title, revenueShared, timePeriod } = req.body;
-    const userId = req.userId; // Get user ID from JWT token
+    const token = req.headers?.authorization.split("Bearer ")[1];
 
+    const userId = jwt.decode(token, authConfig.secret)?.id;// Get user ID from JWT token
+
+    console.log(userId)
     const collaboration = await Collaboration.create({
       title,
       revenueShared,
