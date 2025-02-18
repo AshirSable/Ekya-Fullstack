@@ -4,7 +4,10 @@ const db = require("../models");
 const User = db.user;
 
 verifyToken = (req, res, next) => {
-  let token = req.headers?.Authorization;
+
+  console.log(req.headers)
+
+  const token = req.headers['authorization'];
 
   if (!token) {
     return res.status(403).send({
@@ -12,8 +15,7 @@ verifyToken = (req, res, next) => {
     });
   }
 
-  const extracted_token = token.split("Bearer ")[0]
-
+  const extracted_token = token.split("Bearer ")[1]
   jwt.verify(extracted_token,
     config.secret,
     (err, decoded) => {

@@ -16,17 +16,18 @@ exports.signup = (req, res) => {
     password: bcrypt.hashSync(req.body.password, 8)
   })
     .then(user => {
-      res.status(200).send({message: "user signed up"})
+      res.status(200).send({ message: "user signed up" })
     })
     .catch(err => {
       res.status(500).send({ message: err.message });
     });
 };
 
-exports.signin = (req, res) => {
-  User.findOne({
+exports.signin = async (req, res) => {
+
+  await User.findOne({
     where: {
-      username: req.body.username
+      email: req.body.email
     }
   })
     .then(user => {
@@ -40,31 +41,25 @@ exports.signin = (req, res) => {
       );
 
       if (!passwordIsValid) {
-        return res.status(401).send({
+        res.status(401).send({
           accessToken: null,
           message: "Invalid Password!"
         });
+        return
       }
 
       const token = jwt.sign({ id: user.id },
-                              config.secret,
-                              {
-                                algorithm: 'HS256',
-                                expiresIn: 86400, // 24 hours
-                              });
-
-      var authorities = [];
-      user.getRoles().then(roles => {
-        for (let i = 0; i < roles.length; i++) {
-          authorities.push("ROLE_" + roles[i].name.toUpperCase());
-        }
-        res.status(200).send({
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          roles: authorities,
-          accessToken: token
+        config.secret,
+        {
+          algorithm: 'HS256',
+          expiresIn: 86400, // 24 hours
         });
+
+      res.status(200).send({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        accessToken: token
       });
     })
     .catch(err => {
