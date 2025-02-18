@@ -1,36 +1,29 @@
-const config = require("../config/db.config.js");
+const dbConfig = require("../config/db.config.js");
 const Sequelize = require("sequelize");
-const sequelize = new Sequelize(
-  config.DB,
-  config.USER,
-  config.PASSWORD,
-  {
-    host: config.HOST,
-    dialect: config.dialect,
-    pool: {
-      max: config.pool.max,
-      min: config.pool.min,
-      acquire: config.pool.acquire,
-      idle: config.pool.idle
-    }
-  }
-);
+
+const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
+  host: dbConfig.HOST,
+  dialect: dbConfig.dialect,
+  operatorsAliases: 0,
+  pool: {
+    max: dbConfig.pool.max,
+    min: dbConfig.pool.min,
+    acquire: dbConfig.pool.acquire,
+    idle: dbConfig.pool.idle,
+  },
+});
 
 const db = {};
-
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
+// Import models
 db.user = require("./user.model.js")(sequelize, Sequelize);
 db.role = require("./role.model.js")(sequelize, Sequelize);
+db.collaboration = require("./collaboration.model.js")(sequelize, Sequelize); // Add this
 
-db.role.belongsToMany(db.user, {
-  through: "user_roles"
-});
-db.user.belongsToMany(db.role, {
-  through: "user_roles"
-});
-
-db.ROLES = ["user", "admin", "moderator"];
+// Define relationships
+db.user.hasMany(db.collaboration, { foreignKey: "userId" });
+db.collaboration.belongsTo(db.user, { foreignKey: "userId" });
 
 module.exports = db;
