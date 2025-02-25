@@ -1,10 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const { authJwt } = require("../middleware"); // Ensure the user is authenticated
+const { authJwt } = require("../middleware");
 const collaborationController = require("../controllers/collaboration.controller");
 
-// Protect the route with authentication middleware
+// Ensure user authentication for creating a collaboration
 router.post("/create", [authJwt.verifyToken], collaborationController.createCollaboration);
-router.get("/user/:userId", collaborationController.getUserCollaborations);
+
+// FIXED: API endpoint to match frontend request
+router.get("/user/:userId", [authJwt.verifyToken], collaborationController.getUserCollaborations);
 
 module.exports = router;
