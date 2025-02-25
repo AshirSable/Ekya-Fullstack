@@ -3,26 +3,29 @@ import Explorenav from "../components/loginnav";
 import { FaPlusCircle } from "react-icons/fa";
 import CollaborationForm from "../components/addcollabform";
 import axios from "axios";
+import { jwtDecode } from "jwt-decode"
+
 
 const AddCollab = () => {
   const [showForm, setShowForm] = useState(false);
   const [collaborations, setCollaborations] = useState([]);
 
-  const userId = localStorage.getItem("userId");
   const token = localStorage.getItem("token");
 
-  console.log("User ID:", userId); // Debugging
+  const userId = jwtDecode(token).id
   console.log("Token:", token); // Debugging
 
   // Fetch collaborations from backend on mount
   useEffect(() => {
-    if (!userId || !token) {
+    if (!token) {
       console.error("User ID or Token missing. Cannot fetch data.");
       return;
     }
 
     const fetchCollaborations = async () => {
       try {
+
+
         console.log(`Fetching collaborations from: http://localhost:8000/api/collaboration/user/${userId}`);
         const response = await axios.get(`http://localhost:8000/api/collaboration/user/${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -36,12 +39,12 @@ const AddCollab = () => {
     };
 
     fetchCollaborations();
-  }, [userId, token]); // Run when userId or token changes
+  }, [token]); // Run when userId or token changes
 
   // Handle form submission and store new collaboration
   const handleTitleUpdate = async (title, revenueShared, timePeriod) => {
     setShowForm(false);
-    
+
     try {
       const response = await axios.post("http://localhost:8000/api/collaboration/create", {
         title,
