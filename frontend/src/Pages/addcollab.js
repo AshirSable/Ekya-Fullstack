@@ -8,42 +8,46 @@ const AddCollab = () => {
   const [showForm, setShowForm] = useState(false);
   const [collaborations, setCollaborations] = useState([]);
 
+  const userId = localStorage.getItem("userId");
   const token = localStorage.getItem("token");
-  const userId = localStorage.getItem("userId"); // Ensure userId is stored during login
 
-  // Fetch collaborations from backend
+  console.log("User ID:", userId); // Debugging
+  console.log("Token:", token); // Debugging
+
+  // Fetch collaborations from backend on mount
   useEffect(() => {
+    if (!userId || !token) {
+      console.error("User ID or Token missing. Cannot fetch data.");
+      return;
+    }
+
     const fetchCollaborations = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/api/collaborations/user/${userId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        console.log(`Fetching collaborations from: http://localhost:8000/api/collaboration/user/${userId}`);
+        const response = await axios.get(`http://localhost:8000/api/collaboration/user/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
 
-        const data = await response.json();
-        if (response.ok) {
-          setCollaborations(data.collaborations);
-        } else {
-          console.error("Failed to fetch collaborations:", data.message);
-        }
+        console.log("API Response:", response.data);
+        setCollaborations(response.data.collaborations || []);
       } catch (error) {
-        console.error("Error fetching collaborations:", error);
+        console.error("Error fetching collaborations:", error.response?.data?.message || error.message);
       }
     };
 
-    if (userId) fetchCollaborations();
-  }, [userId, token]); // Re-fetch data when userId or token changes
+    fetchCollaborations();
+  }, [userId, token]); // Run when userId or token changes
 
-  // Handle form submission and store data in database
+  // Handle form submission and store new collaboration
   const handleTitleUpdate = async (title, revenueShared, timePeriod) => {
     setShowForm(false);
-    const token = localStorage.getItem("token")
+    
     try {
       const response = await axios.post("http://localhost:8000/api/collaboration/create", {
-        title: title,
-        revenueShared: revenueShared,
-        timePeriod: timePeriod
+        title,
+        revenueShared,
+        timePeriod,
+        userId, // Ensure userId is sent to associate collaboration with user
       }, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -51,14 +55,11 @@ const AddCollab = () => {
         }
       });
 
-      const data = await response.data;
-      if (response.ok) {
-        setCollaborations([...collaborations, data.collaboration]);
-      } else {
-        console.error("Failed to create collaboration:", data.message);
-      }
+      console.log("Collaboration Created:", response.data);
+
+      setCollaborations([...collaborations, response.data.collaboration]); // Update state
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error creating collaboration:", error.response?.data?.message || error.message);
     }
   };
 
@@ -81,7 +82,7 @@ const AddCollab = () => {
           <h1 className="text-2xl font-semibold">Your Collaborations</h1>
         </div>
 
-        {/* Your Collaborations Section */}
+        {/* Collaborations Section */}
         <div className="flex flex-col items-center justify-center flex-grow mb-10">
           {!showForm ? (
             collaborations.length > 0 ? (
