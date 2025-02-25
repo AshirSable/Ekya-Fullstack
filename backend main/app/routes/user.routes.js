@@ -1,4 +1,5 @@
 const controller = require("../controllers/user.controller");  // Correct import
+const { verifyToken } = require("../middleware/authJwt");
 
 module.exports = function(app) {
   app.use(function(req, res, next) {
@@ -11,7 +12,7 @@ module.exports = function(app) {
 
   // Routes for user actions
   app.get("/api/user/all", controller.allAccess);  // Public route
-  app.get("/api/user/user", controller.userBoard);  // User-specific route
   app.get("/api/user/mod", controller.moderatorBoard);  // Moderator-specific route
   app.get("/api/user/admin", controller.adminBoard);  // Admin-specific route
+  app.get("/api/user/:id", [verifyToken], controller.userBoard);  // User-specific route
 };

@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/navbar';
 import loginbg from "../assets/loginbg.png";
+import { jwtDecode } from 'jwt-decode'
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -15,8 +16,11 @@ export default function Login() {
         email: email,  // Assuming backend expects "username" (use email here)
         password
       });
+      const token = response.data.accessToken
+      const username = response.data.username
+      localStorage.setItem('token', token); // Store JWT
+      localStorage.setItem('username', username)
 
-      localStorage.setItem('token', response.data.accessToken); // Store JWT
       alert('Login successful!');
       navigate('/profile'); // Redirect to profile page
     } catch (error) {
