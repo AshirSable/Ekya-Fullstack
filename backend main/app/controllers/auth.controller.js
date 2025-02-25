@@ -48,7 +48,7 @@ exports.signin = async (req, res) => {
         return
       }
 
-      const token = jwt.sign({ id: user.id },
+      const token = jwt.sign({ id: user.id, name: user.username },
         config.secret,
         {
           algorithm: 'HS256',
