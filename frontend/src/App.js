@@ -17,6 +17,7 @@ import Financial from './Pages/financials';
 import Pulse from './Pages/pulse';
 import Profile from './Pages/profile';
 import Notifications from './Pages/notifications';
+import CollabDetails from './Pages/collabdetails';
 
 export default function App() {
   return (
@@ -38,6 +39,7 @@ export default function App() {
           <Route path="pulse" element={<Pulse/>}/>
           <Route path="profile" element={<Profile/>}/>
           <Route path="notifications" element={<Notifications/>}/>
+          <Route path="collabdetails" element={<CollabDetails/>}/>
         </Route>
       </Routes>
     </BrowserRouter>
