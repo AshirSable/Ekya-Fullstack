@@ -16,6 +16,7 @@ import PastCollab from './Pages/pastcollab';
 import Financial from './Pages/financials';
 import Pulse from './Pages/pulse';
 import Profile from './Pages/profile';
+import EditProf from './Pages/editprofile'
 
 export default function App() {
   return (
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="financials" element={<Financial/>}/>
           <Route path="pulse" element={<Pulse/>}/>
           <Route path="profile" element={<Profile/>}/>
+          <Route path="editprofile" element={<EditProf/>}/>
         </Route>
       </Routes>
     </BrowserRouter>

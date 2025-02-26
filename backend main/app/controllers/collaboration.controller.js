@@ -44,3 +44,23 @@ exports.createCollaboration = async (req, res) => {
     res.status(500).json({ message: "Server error while creating collaboration" });
   }
 };
+
+exports.deleteCollaboration = async (req, res) => {
+  try {
+    const collabId = req.params.collabId;
+    const userId = req.userId; // Extract user ID from token
+
+    const collaboration = await Collaboration.findOne({ where: { id: collabId, userId } });
+
+    if (!collaboration) {
+      return res.status(404).json({ message: "Collaboration not found or unauthorized" });
+    }
+
+    await collaboration.destroy();
+    res.status(200).json({ message: "Collaboration deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting collaboration:", error);
+    res.status(500).json({ message: "Server error while deleting collaboration" });
+  }
+};
+

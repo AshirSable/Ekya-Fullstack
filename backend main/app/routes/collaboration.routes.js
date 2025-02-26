@@ -9,4 +9,6 @@ router.post("/create", [authJwt.verifyToken], collaborationController.createColl
 // FIXED: API endpoint to match frontend request
 router.get("/user/:userId", [authJwt.verifyToken], collaborationController.getUserCollaborations);
 
+router.delete("/delete/:collabId", [authJwt.verifyToken], collaborationController.deleteCollaboration);
+
 module.exports = router;
