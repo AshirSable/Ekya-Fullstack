@@ -5,6 +5,7 @@ import { IoMdNotificationsOutline } from 'react-icons/io';
 import profile from "../assets/profile.jpeg"
 import exphero from "../assets/Intersect.png"
 import google from "../assets/google.jpeg"
+import TopBar from '../components/topbar';
 
 const App = () => {
   return (
@@ -15,30 +16,7 @@ const App = () => {
 
       {/* Main Content */}
       <div className="flex-1 p-8 ml-6 overflow-y-auto">
-        {/* Top Bar */}
-        <div className="flex items-center mb-6 p-2 rounded-2xl bg-white shadow border">
-          {/* Sidebar Toggle Button (if needed) */}
-          <button className="p-2 rounded-full bg-white border ml-4">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
-            </svg>
-          </button>
-
-          {/* Search Bar */}
-          <div className="flex items-center bg-white p-3 rounded-full border w-1/2 ml-6">
-            <FaSearch className="text-gray-400 mr-3" />
-            <input
-              type="text"
-              placeholder="Search here..."
-              className="outline-none w-full"
-            />
-          </div>
-
-          <button className="p-2 rounded-full bg-white border mr-4 ml-auto">
-            <IoMdNotificationsOutline className="text-gray-400 text-2xl" />
-          </button>
-
-        </div>
+        <TopBar/>
 
         <section className="relative bg-cover bg-center bg-[#2BAF7F] rounded-3xl h-[45vh] mb-8 overflow-hidden flex items-center justify-between shadow-md">
           <div className=" flex-col justify-center px-10 mt-[5%]">
