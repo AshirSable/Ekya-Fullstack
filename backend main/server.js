@@ -5,7 +5,8 @@ const bodyParser = require("body-parser");
 const db = require("./app/models"); // Sequelize models
 const authRoutes = require("./app/routes/auth.routes");  // Correct import
 const userRoutes = require("./app/routes/user.routes");  // Correct import
-const collaborationRoutes = require("./app/routes/collaboration.routes"); 
+const collaborationRoutes = require("./app/routes/collaboration.routes");
+const profileRoutes = require("./app/routes/profile.routes")
 
 const app = express();
 
@@ -30,6 +31,7 @@ db.sequelize.sync().then(() => {
 app.use("/api/auth", authRoutes);  // Correct use of authRoutes
 app.use("/api/user", userRoutes);  // Correct use of userRoutes
 app.use("/api/collaboration", collaborationRoutes);
+app.use("/api/profile", profileRoutes)
 
 const financialPulseRoutes = require("./app/routes/financialPulse.routes");
 app.use("/api/financialPulse", financialPulseRoutes);
