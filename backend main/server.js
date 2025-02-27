@@ -31,6 +31,9 @@ app.use("/api/auth", authRoutes);  // Correct use of authRoutes
 app.use("/api/user", userRoutes);  // Correct use of userRoutes
 app.use("/api/collaboration", collaborationRoutes);
 
+const financialPulseRoutes = require("./app/routes/financialPulse.routes");
+app.use("/api/financialPulse", financialPulseRoutes);
+
 // Test route
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to the Ekya API!" });

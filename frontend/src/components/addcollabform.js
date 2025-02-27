@@ -15,7 +15,7 @@ const CollaborationForm = ({ setShowForm, handleTitleUpdate }) => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-xl">
+    <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-xl  self-center">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Create a New Collaboration</h2>
         <button onClick={handleClose} className="text-gray-500 text-xl font-bold">×</button>

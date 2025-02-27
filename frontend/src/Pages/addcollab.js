@@ -62,10 +62,11 @@ const AddCollab = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100 min-h-screen">
+    <div className="flex bg-gray-100 min-h-screen">
       <Explorenav />
 
       <div className="ml-72 p-6 flex flex-col w-full">
+        {/* Welcome Message */}
         <div className="bg-green-100 rounded-lg p-6 shadow-md mb-6">
           <h1 className="text-2xl font-semibold mb-4">Welcome!</h1>
           <p className="text-gray-600">
@@ -73,13 +74,15 @@ const AddCollab = () => {
           </p>
         </div>
 
+        {/* Your Collaborations Header */}
         <h1 className="text-2xl font-semibold mb-4">Your Collaborations</h1>
 
-        <div className="flex flex-col items-center justify-center flex-grow mb-10">
+        {/* Collaboration List (Updated Alignment) */}
+        <div className="flex flex-col space-y-4 mb-10">
           {!showForm ? (
             collaborations.length > 0 ? (
               collaborations.map((collab) => (
-                <div key={collab.id} className="bg-white rounded-lg shadow-md h-24 w-full mb-4 border border-gray-200 p-4">
+                <div key={collab.id} className="bg-white rounded-lg shadow-md h-24 w-full border  self-center  border-gray-200 p-4">
                   <h2 className="text-xl font-semibold">{collab.title}</h2>
                   <div className="flex justify-between items-center mt-2">
                     <div className="flex space-x-10">
