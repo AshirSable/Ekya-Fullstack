@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Explorenav from "../components/loginnav";
+import { jwtDecode } from 'jwt-decode'
 
 export default function EditProfile() {
   const navigate = useNavigate();
-  const userId = localStorage.getItem("userId"); // Ensure userId exists
+  const userId = jwtDecode(localStorage.getItem("token"))?.id; // Ensure userId exists
 
   const [formData, setFormData] = useState({
     businessTitle: "",
@@ -19,7 +20,7 @@ export default function EditProfile() {
   useEffect(() => {
     if (userId) {
       axios
-        .get(`http://localhost:5000/api/profile/${userId}`)
+        .get(`http://localhost:8000/api/profile/${userId}`)
         .then((response) => {
           if (response.data) {
             setFormData({
@@ -69,18 +70,26 @@ export default function EditProfile() {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    console.log(userId)
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/profile/${userId}`, 
-        formData, 
+        `http://localhost:8000/api/profile/${userId}`, {
+        businessTitle: formData.businessTitle,
+        businessDescription: formData.businessDescription,
+        businessCoreValues: formData.businessCoreValues,
+        collaborationInterests: formData.collaborationInterests,
+        milestones: formData.milestones
+      },
         {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("token")}`, // Ensure token is sent
           },
+
         }
-    );
-    
+      );
+
       if (response.status === 200) {
         alert("Profile updated successfully!");
         navigate("/profile"); // Redirect after updating
