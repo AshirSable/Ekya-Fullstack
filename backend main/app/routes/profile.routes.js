@@ -1,15 +1,17 @@
 const express = require("express");
 const router = express.Router();
-const { Profile } = require("../models");
-const authMiddleware = require("../middlewares/authMiddleware"); // Authentication middleware
+const db = require("../models");
+const { verifyToken } = require("../middleware/authJwt");
+const { BearerToken } = require("../utils/common");
+const jwt = require('jsonwebtoken')
 
 // Update profile API
-router.put("/profile/:userId", authMiddleware, async (req, res) => {
+router.put("/:userId", [verifyToken], async (req, res) => {
   try {
     const { businessTitle, businessDescription, businessCoreValues, collaborationInterests, milestones } = req.body;
-    const userId = req.userId; // Extract user ID from token
-
-    const profile = await Profile.findOne({ where: { userId } });
+    const token = BearerToken(req.headers['authorization']); // Extract user ID from token
+    const userId = jwt.decode(token)?.id
+    const profile = await db.profile.findOne({ where: { userId } });
 
     if (!profile) {
       return res.status(404).json({ success: false, message: "Profile not found" });
@@ -31,17 +33,17 @@ router.put("/profile/:userId", authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/profile/:userId", authMiddleware, async (req, res) => {
-    try {
-      const profile = await Profile.findOne({ where: { userId: req.params.userId } });
-      if (!profile) {
-        return res.status(404).json({ success: false, message: "Profile not found" });
-      }
-      res.json({ success: true, profile });
-    } catch (error) {
-      console.error("Error fetching profile:", error);
-      res.status(500).json({ success: false, message: "Server error" });
+router.get("/:userId", [verifyToken], async (req, res) => {
+  try {
+    const profile = await db.profile.findOne({ where: { userId: req.params.userId } });
+    if (!profile) {
+      return res.status(404).json({ success: false, message: "Profile not found" });
     }
-  });
+    res.json({ success: true, profile });
+  } catch (error) {
+    console.error("Error fetching profile:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
 
 module.exports = router;
