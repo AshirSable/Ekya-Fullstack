@@ -7,6 +7,7 @@ import exphero from "../assets/Intersect.png";
 import google from "../assets/google.jpeg";
 import TopBar from "../components/topbar";
 import { useNavigate } from 'react-router-dom';
+import CollaborationsList from "../components/collaborationlist";
 
 const App = () => {
   const navigate = useNavigate(); // Initialize navigate function
@@ -56,34 +57,7 @@ const App = () => {
                 See All
               </button>
             </div>
-            <div className="flex space-x-4 overflow-x-auto mt-5">
-              {Array(5)
-                .fill()
-                .map((_, index) => (
-                  <div
-                    key={index}
-                    className="bg-white p-6 rounded-lg shadow-md border mb-5 w-56 min-w-[14rem] cursor-pointer hover:shadow-lg transition"
-                    onClick={() => navigate("/collabdetails")} // Corrected use of navigate
-                  >
-                    <div className="flex justify-center items-center mb-4 h-[12vh]">
-                      <img
-                        src={google}
-                        alt="Company"
-                        className="object-contain h-full"
-                      />
-                    </div>
-                    <hr />
-                    <h4 className="font-semibold mb-2 mt-4">GOOGLE</h4>
-                    <p className="text-sm text-gray-500">
-                      A Software for Business Collaboration
-                    </p>
-                    <p className="text-sm text-gray-500 mt-2">
-                      Revenue Shared: 50%
-                    </p>
-                    <p className="text-sm text-gray-500">Timeline: 1 Month</p>
-                  </div>
-                ))}
-            </div>
+            <CollaborationsList />
           </div>
 
           {/* Most Popular */}

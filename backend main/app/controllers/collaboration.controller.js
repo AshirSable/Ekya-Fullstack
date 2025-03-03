@@ -64,3 +64,12 @@ exports.deleteCollaboration = async (req, res) => {
   }
 };
 
+exports.getAllCollaborations = async (req, res) => {
+  try {
+    const collaborations = await Collaboration.findAll(); // Fetch all data
+    res.status(200).json({ collaborations }); // Ensure correct response format
+  } catch (error) {
+    console.error("Error fetching collaborations:", error);
+    res.status(500).json({ message: "Server error while fetching collaborations" });
+  }
+};
