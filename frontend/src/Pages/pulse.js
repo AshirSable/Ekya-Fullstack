@@ -3,12 +3,16 @@ import { useNavigate } from "react-router-dom";
 import Explorenav from "../components/loginnav";
 import * as XLSX from "xlsx";
 import Papa from "papaparse";
+import { jwtDecode } from "jwt-decode";
+import { ResponsiveContainer, RadialBarChart, RadialBar, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
 
 const Pulse = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const [fileName, setFileName] = useState("");
   const [healthScore, setHealthScore] = useState(null);
+  const [financialData, setFinancialData] = useState([]);
+  const userId = jwtDecode(localStorage.getItem("token"))?.id;
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -28,7 +32,6 @@ const Pulse = () => {
 
     if (file) {
       const fileExtension = file.name.split(".").pop();
-      
       if (fileExtension === "csv") {
         Papa.parse(file, {
           header: true,
@@ -67,11 +70,11 @@ const Pulse = () => {
     }));
 
     try {
-      const response = await fetch("http://localhost:5000/api/financialPulse/analyze", {
+      const response = await fetch("http://localhost:8000/api/financialPulse", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Ensure the token is sent for authentication
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(processedData),
       });
@@ -79,6 +82,7 @@ const Pulse = () => {
       const result = await response.json();
       if (response.ok) {
         setHealthScore(result.healthScores[0]);
+        setFinancialData(processedData);
       } else {
         console.error("Error analyzing financial health:", result.message);
         alert("Error processing data. Please try again.");
@@ -90,46 +94,49 @@ const Pulse = () => {
   };
 
   return (
-    <>
-      <div className="flex h-screen bg-gray-100 min-h-screen">
-        <Explorenav />
-
-        <div className="ml-80 h-44 w-full mr-8 mt-7 bg-white rounded-lg shadow-md p-5 relative overflow-hidden">
-          <div>
-            <p className="text-2xl text-green-600 font-semibold">Financial Pulse</p>
-            <p className="mt-2 text-gray-600">
-              Assess Financial Health With Financial Pulse, Monitor Key Metrics to Maintain a Healthy Business
-            </p>
-            {healthScore && (
-              <p className="mt-4 text-sm text-gray-600">
-                Financial Health Score: <p className="text-3xl font-bold"> {healthScore}/100 </p>
-              </p>
-            )}
+    <div className="flex h-screen bg-gray-100 min-h-screen">
+      <Explorenav />
+      <div className="ml-80 w-full mr-8 mt-7 bg-white rounded-lg shadow-md p-5 relative overflow-hidden">
+        <p className="text-2xl text-green-600 font-semibold">Financial Pulse</p>
+        <p className="mt-2 text-gray-600">
+          Assess Financial Health With Financial Pulse, Monitor Key Metrics to Maintain a Healthy Business
+        </p>
+        {healthScore && (
+          <div className="mt-6">
+            <p className="text-sm text-gray-600">Financial Health Score:</p>
+            <ResponsiveContainer width="50%" height={200}>
+              <RadialBarChart innerRadius="50%" outerRadius="100%" data={[{ name: "Health Score", value: healthScore }]}>
+                <RadialBar minAngle={15} background dataKey="value" fill="#82ca9d" />
+              </RadialBarChart>
+            </ResponsiveContainer>
+            <p className="text-3xl font-bold text-center">{healthScore}/100</p>
           </div>
-
-          <div className="absolute top-24 right-9">
-            <button
-              onClick={handleClick}
-              className="p-3 bg-green-500 font-semibold text-white rounded-lg hover:bg-green-600 transition"
-            >
-              Upload Excel File
-            </button>
-
-            <input
-              type="file"
-              accept=".xlsx, .xls, .csv"
-              ref={fileInputRef}
-              onChange={handleFileUpload}
-              style={{ display: "none" }}
-            />
-
-            {fileName && (
-              <p className="mt-2 text-sm text-gray-600 text-left">Uploaded: {fileName}</p>
-            )}
+        )}
+        <div className="absolute top-24 right-9">
+          <button onClick={handleClick} className="p-3 bg-green-500 font-semibold text-white rounded-lg hover:bg-green-600">
+            Upload Excel File
+          </button>
+          <input type="file" accept=".xlsx, .xls, .csv" ref={fileInputRef} onChange={handleFileUpload} style={{ display: "none" }} />
+          {fileName && <p className="mt-2 text-sm text-gray-600">Uploaded: {fileName}</p>}
+        </div>
+        {financialData.length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-xl font-bold">Financial Metrics</h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={financialData}>
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="cashFlow" fill="#82ca9d" />
+                <Bar dataKey="revenue" fill="#8884d8" />
+                <Bar dataKey="expenses" fill="#d88488" />
+                <Bar dataKey="debtToEquityRatio" fill="#d8b888" />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-        </div> 
+        )}
       </div>
-    </>
+    </div>
   );
 };
 
