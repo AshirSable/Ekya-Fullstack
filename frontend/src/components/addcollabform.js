@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 
 const CollaborationForm = ({ setShowForm, handleTitleUpdate }) => {
   const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [skills, setSkills] = useState('');
+  const [roles, setRoles] = useState('');
   const [revenueShared, setRevenueShared] = useState('');
   const [timePeriod, setTimePeriod] = useState('');
 
@@ -11,7 +14,7 @@ const CollaborationForm = ({ setShowForm, handleTitleUpdate }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    handleTitleUpdate(title, revenueShared, timePeriod);
+    handleTitleUpdate(title, description, skills, roles, revenueShared, timePeriod);
   };
 
   return (
@@ -38,6 +41,8 @@ const CollaborationForm = ({ setShowForm, handleTitleUpdate }) => {
           <textarea
             className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
             placeholder="Project description should be within 30 words"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
           ></textarea>
         </div>
         <div className="mb-4">
@@ -46,6 +51,8 @@ const CollaborationForm = ({ setShowForm, handleTitleUpdate }) => {
             type="text"
             className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
             placeholder="Eg: Data Analyst for data visualization"
+            value={roles}
+            onChange={(e) => setRoles(e.target.value)}
           />
         </div>
         <div className="mb-4">
@@ -54,6 +61,8 @@ const CollaborationForm = ({ setShowForm, handleTitleUpdate }) => {
             type="text"
             className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
             placeholder="Eg: Problem Solving, Data Storytelling"
+            value={skills}
+            onChange={(e) => setSkills(e.target.value)}
           />
         </div>
         <div className="flex space-x-4 mb-4">

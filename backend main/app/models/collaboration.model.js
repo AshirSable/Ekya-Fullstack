@@ -2,15 +2,27 @@ module.exports = (sequelize, Sequelize) => {
     const Collaboration = sequelize.define("collaboration", {
       title: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
+      },
+      description: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      skills:{
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      roles: {
+        type: Sequelize.STRING,
+        allowNull: true,
       },
       revenueShared: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       timePeriod: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       userId: {
         type: Sequelize.INTEGER,

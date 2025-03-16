@@ -3,34 +3,32 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import googleLogo from "../assets/google.jpeg";
 
-
 const CollaborationsList = () => {
   const [collaborations, setCollaborations] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     axios
-      .get("http://localhost:8000/api/collaboration") // Ensure this matches backend
+      .get("http://localhost:8000/api/collaboration")
       .then((response) => {
-        console.log("Frontend received:", response.data); // Debugging
-        setCollaborations(response.data.collaborations || []); // Ensure proper setting
+        console.log("Frontend received:", response.data);
+        setCollaborations(response.data.collaborations || []);
       })
       .catch((error) => console.error("Error fetching data:", error));
   }, []);
-  
 
   return (
     <div className="flex space-x-4 overflow-x-auto mt-5">
       {collaborations.length > 0 ? (
         collaborations.map((collab) => (
           <div
-            key={collab.id} // Use a unique ID instead of index
+            key={collab.id}
             className="bg-white p-6 rounded-lg shadow-md border mb-5 w-56 min-w-[14rem] cursor-pointer hover:shadow-lg transition"
-            onClick={() => navigate(`/collabdetails`)} // Pass collab ID for details page
+            onClick={() => navigate(`/collabdetails/${collab.id}`)} // Pass ID to details page
           >
-          <div className="flex justify-center items-center mb-4 h-[12vh]">
+            <div className="flex justify-center items-center mb-4 h-[12vh]">
               <img
-                src={collab.image || googleLogo} // Use dynamic image or default
+                src={collab.image || googleLogo}
                 alt={collab.title}
                 className="object-contain h-full"
               />

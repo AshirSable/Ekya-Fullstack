@@ -1,77 +1,139 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
 import Explorenav from "../components/loginnav";
-import { FaBuilding, FaClock, FaCode, FaMoneyBillWave } from "react-icons/fa";
-import collabdetails from "../assets/collabdetails.png";
-import { useRef } from "react";
+import companylogo from "../assets/cyphersol.jpeg";
 import aboutImage from "../assets/aboutimage.jpeg";
-import ProfileDetails from "../components/profiledetails";
+import servicesImage from "../assets/service.jpg";
+import imagetr from "../assets/gometric.jpeg";
+import { jwtDecode } from "jwt-decode"; // For fetching logged-in username
 
 const CollabDetails = () => {
+  const { id } = useParams();
+  const [collabDetails, setCollabDetails] = useState(null);
+  const [username, setUsername] = useState("");  // Store logged-in username
+  const aboutUsRef = useRef(null);
+  const servicesRef = useRef(null);
+  const collaborationsRef = useRef(null);
+  const milestonesRef = useRef(null);
+
+  console.log("Logged-in username:", username);
+
+   useEffect(() => {
+    // Fetch Collaboration Details
+    axios
+      .get(`http://localhost:8000/api/collaboration/${id}`)
+      .then((response) => {
+        console.log("Collaboration Details:", response.data);
+        setCollabDetails(response.data);
+      })
+      .catch((error) => console.error("Error fetching details:", error));
+
+    // Fetch Username from localStorage
+    const storedUsername = localStorage.getItem("username");
+    if (storedUsername) {
+      setUsername(storedUsername); // ✅ Correct way to fetch username
+    }
+  }, [id]);
+
+  if (!collabDetails) {
+    return <p className="text-center mt-10">Loading collaboration details...</p>;
+  }
+
+  // Function to Handle Request Submission
+  const handleRequest = async () => {
+    if (!collabDetails.user.id || !username || !collabDetails.title) {
+      alert("Error: Missing required data for request.");
+      return;
+    }
+  
+    try {
+      const response = await axios.post(`http://localhost:8000/api/collaboration-request`, {
+        receiverId: collabDetails.user.id,    // Corrected field name
+        senderName: username,               // Ensure username is fetched correctly
+        projectTitle: collabDetails.title    // Collaboration project title
+      });
+  
+      alert(`Request sent successfully to ${collabDetails.user?.profile?.businessName}`);
+    } catch (error) {
+      console.error("Error sending request:", error.response?.data || error.message);
+      alert(`Failed to send request: ${error.response?.data?.error || "Unknown error"}`);
+    }
+  };
+  
   
 
   return (
-    <div className="flex h-full overflow-hidden p-4 relative">
+    <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar */}
-      <div className="w-64 ml-3 bg-gray-800 rounded-xl shadow-lg">
+      <div className="w-64 bg-gray-800 min-h-screen">
         <Explorenav />
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-8 overflow-y-auto rounded-xl shadow-lg m-4 flex flex-col relative">
-        {/* Background Image */}
-        <img
-          src={collabdetails}
-          alt="Collaboration Details"
-          className="absolute top-0 right-0 w-2/4 h-auto object-contain pointer-events-none"
-        />
-
-        <div>
-          <h1 className="text-2xl font-bold mb-2">
-            A Software for Business Collaboration
+      <div className="relative flex-grow p-10 overflow-y-auto">
+        {/* Geometric Image at Top Right */}
+        <div className="bg-white p-8 rounded-2xl shadow-lg ml-6 max-w-6xl w-full relative">
+          <img
+            src={imagetr}
+            alt="Geometric Design"
+            className="absolute top-0 right-0 w-40 md:w-48 lg:w-56 rounded-r-2xl"
+          />
+          
+          {/* Title */}
+          <h1 className="text-3xl font-bold text-gray-900">
+            {collabDetails.title || "No Title"}
           </h1>
-          <h2 className="text-xl font-semibold text-gray-700 mb-4">
-            Google LLC
-          </h2>
 
-          {/* Details Section */}
-          <div className="space-y-4">
-            <div className="flex items-center">
-              <FaMoneyBillWave className="text-green-500 text-lg mr-2" />
-              <span className="font-semibold">Revenue Shared:</span>
-              <span className="ml-2">34% Revenue Sharing (Negotiable)</span>
+          {/* Company Info */}
+          <div className="flex items-center mt-6">
+            <img
+              src={companylogo}
+              alt="Company Logo"
+              className="w-16 h-16 rounded-full border border-gray-300"
+            />
+            <h2 className="ml-4 text-xl font-semibold text-gray-800">
+              {collabDetails.user?.profile?.businessName || "Unknown Company"}
+            </h2>
+          </div>
+
+          {/* Collaboration Details Grid */}
+          <div className="grid grid-cols-2 gap-6 mt-6">
+            <div>
+              <p className="font-semibold text-gray-700">Revenue Shared</p>
+              <p className="text-gray-600">
+                {collabDetails.revenueShared}% Revenue Sharing (Negotiable)
+              </p>
             </div>
-            <div className="flex items-center">
-              <FaCode className="text-blue-500 text-lg mr-2" />
-              <span className="font-semibold">Skilled In:</span>
-              <span className="ml-2">Web Development</span>
+
+            <div>
+              <p className="font-semibold text-gray-700">Skilled In</p>
+              <p className="text-gray-600">
+                {collabDetails.skills || "Not Specified"}
+              </p>
             </div>
-            <div className="flex items-center">
-              <FaClock className="text-purple-500 text-lg mr-2" />
-              <span className="font-semibold">Time Period:</span>
-              <span className="ml-2">12 Months</span>
+
+            <div className="col-span-2">
+              <p className="font-semibold text-gray-700">Roles & Responsibilities</p>
+              <p className="text-gray-600">{collabDetails.roles || "Not specified"}</p>
+            </div>
+
+            <div>
+              <p className="font-semibold text-gray-700">Time Period</p>
+              <p className="text-gray-600">{collabDetails.timePeriod} Months</p>
             </div>
           </div>
 
-          {/* Roles & Responsibilities */}
-          <div className="mt-6">
-            <h3 className="text-lg font-semibold">Roles & Responsibilities</h3>
-            <p className="text-gray-600 mt-2">
-              Backend development for User Authentication. Their role includes
-              designing and developing RESTful APIs, managing databases, and
-              more.
-            </p>
+          {/* Send Request Button */}
+          <div className="flex justify-end mt-6">
+            <button
+              onClick={handleRequest}
+              className="bg-green-500 text-white px-6 py-2 rounded-full hover:bg-green-600"
+            >
+              SEND REQUEST
+            </button>
           </div>
         </div>
-
-        {/* Button */}
-        <div className="flex justify-end mt-6">
-          <button className="bg-green-500 text-white px-6 py-2 rounded-full hover:bg-green-600">
-            SEND REQUEST
-          </button>
-        </div>
-
-        {/* Additional Content */}
-        <ProfileDetails />
       </div>
     </div>
   );

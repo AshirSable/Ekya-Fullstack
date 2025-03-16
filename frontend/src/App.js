@@ -41,7 +41,7 @@ export default function App() {
           <Route path="profile" element={<Profile/>}/>
           <Route path="notifications" element={<Notifications/>}/>
           <Route path="editprofile" element={<EditProfile/>}/>
-          <Route path="collabdetails" element={<CollabDetails/>}/>
+          <Route path="/collabdetails/:id" element={<CollabDetails />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -31,11 +31,14 @@ const AddCollab = () => {
     fetchCollaborations();
   }, [token]);
 
-  const handleTitleUpdate = async (title, revenueShared, timePeriod) => {
+  const handleTitleUpdate = async (title, roles, skills, description, revenueShared, timePeriod) => {
     setShowForm(false);
     try {
       const response = await axios.post("http://localhost:8000/api/collaboration/create", {
         title,
+        roles,
+        skills,
+        description,
         revenueShared,
         timePeriod,
         userId,
@@ -45,7 +48,7 @@ const AddCollab = () => {
 
       setCollaborations([...collaborations, response.data.collaboration]);
     } catch (error) {
-      console.error("Error creating collaboration:", error.response?.data?.message || error.message);
+      console.error("Error creating collaboration:", error.response || error.message);
     }
   };
 
