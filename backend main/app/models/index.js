@@ -1,5 +1,5 @@
 const dbConfig = require("../config/db.config.js");
-const { Sequelize, DataTypes } = require("sequelize"); 
+const { Sequelize, DataTypes } = require("sequelize");
 
 const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
   host: dbConfig.HOST,
@@ -26,6 +26,7 @@ db.profile = require("./profile.model.js")(sequelize, DataTypes);
 // Collaboration Request Model
 db.CollaborationRequest = require("./collabrequest.model.js")(sequelize, DataTypes);
 
+db.OngoingCollaborations = require("./ongoincollaboration.model.js")(sequelize, DataTypes);
 // Define relationships
 db.user.hasOne(db.profile, { foreignKey: "userId", onDelete: "CASCADE" });
 db.profile.belongsTo(db.user, { foreignKey: "userId" });

@@ -1,9 +1,10 @@
 const db = require("../models");
 const CollaborationRequest = db.CollaborationRequest;
-const OngoingCollab = db.OngoingCollab;
+const OngoingCollab = db.OngoingCollaborations;
 
 // ✅ Create a new collaboration request
 exports.createRequest = async (req, res) => {
+  console.log(req.body)
   const { ownerId, senderUsername, collaborationTitle, senderId } = req.body;
 
   if (!ownerId || !senderUsername || !collaborationTitle || !senderId) {
@@ -68,9 +69,9 @@ exports.updateRequestStatus = async (req, res) => {
     if (status === "accepted") {
       await OngoingCollab.create({
         ownerId: request.ownerId,
-        senderId: request.senderId,
+        senderId: req.body.senderId,
         senderUsername: request.senderUsername,
-        collaborationTitle: request.collaborationTitle,
+        projectTitle: request.collaborationTitle,
         status: "in-progress",
       });
     }

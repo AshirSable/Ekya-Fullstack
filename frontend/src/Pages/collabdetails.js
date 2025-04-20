@@ -10,6 +10,9 @@ import { jwtDecode } from "jwt-decode"; // For fetching logged-in username
 
 const CollabDetails = () => {
   const { id } = useParams();
+  const token = localStorage.getItem("token")
+
+  const userid = jwtDecode(token)?.id
   const [collabDetails, setCollabDetails] = useState(null);
   const [username, setUsername] = useState("");  // Store logged-in username
   const aboutUsRef = useRef(null);
@@ -18,9 +21,9 @@ const CollabDetails = () => {
   const milestonesRef = useRef(null);
 
   console.log("Sending Request With:");
-  
 
-   useEffect(() => {
+
+  useEffect(() => {
     // Fetch Collaboration Details
     axios
       .get(`http://localhost:8000/api/collaboration/${id}`)
@@ -43,27 +46,29 @@ const CollabDetails = () => {
 
   // Function to Handle Request Submission
   const handleRequest = async () => {
-  
+
     if (!collabDetails.userId || !username || !collabDetails.title) {
       alert("Error: Missing required data for request.");
       return;
     }
-  
+
     try {
       const response = await axios.post(`http://localhost:8000/api/collaboration-request`, {
-        ownerId: collabDetails.userId,    // Corrected field name
+        ownerId: collabDetails.userId,// Corrected field name
+        senderId: userid,
         senderUsername: username,               // Ensure username is fetched correctly
         collaborationTitle: collabDetails.title    // Collaboration project title
       });
-  
+
       alert(`Request sent successfully to ${collabDetails.user?.profile?.businessName}`);
     } catch (error) {
+      console.log(error)
       console.error("Error sending request:", error.response?.data || error.message);
       alert(`Failed to send request: ${error.response?.data?.error || "Unknown error"}`);
     }
   };
-  
-  
+
+
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -81,7 +86,7 @@ const CollabDetails = () => {
             alt="Geometric Design"
             className="absolute top-0 right-0 w-40 md:w-48 lg:w-56 rounded-r-2xl"
           />
-          
+
           {/* Title */}
           <h1 className="text-3xl font-bold text-gray-900">
             {collabDetails.title || "No Title"}
