@@ -1,5 +1,5 @@
 const db = require("../models");
-const OngoingCollab = db.OngoingCollaboration;
+const OngoingCollab = db.OngoingCollaborations;
 const Profile = db.profile;
 const User = db.user;
 
@@ -35,7 +35,7 @@ exports.getOngoingForUser = async (req, res) => {
       where: {
         [db.Sequelize.Op.or]: [
           { ownerId: userId },
-          { collaboratorId: userId }
+          { senderId: userId }
         ]
       }
     });
