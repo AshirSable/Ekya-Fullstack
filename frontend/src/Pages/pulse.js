@@ -1,143 +1,92 @@
-import React, { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import Explorenav from "../components/loginnav";
+import React, { useState } from "react";
 import * as XLSX from "xlsx";
-import Papa from "papaparse";
-import { jwtDecode } from "jwt-decode";
-import { ResponsiveContainer, RadialBarChart, RadialBar, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
 
-const Pulse = () => {
-  const navigate = useNavigate();
-  const fileInputRef = useRef(null);
-  const [fileName, setFileName] = useState("");
-  const [healthScore, setHealthScore] = useState(null);
-  const [financialData, setFinancialData] = useState([]);
-  const userId = jwtDecode(localStorage.getItem("token"))?.id;
+function Pulse() {
+  const [score, setScore] = useState(null);
+  const [percentScore, setPercentScore] = useState(null);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Session expired. Please log in again.");
-      navigate("/login");
-    }
-  }, [navigate]);
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
 
-  const handleClick = () => {
-    fileInputRef.current.click();
-  };
+    reader.onload = (event) => {
+      const data = new Uint8Array(event.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
 
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    setFileName(file ? file.name : "");
+      try {
+        const df1 = XLSX.utils.sheet_to_json(workbook.Sheets["Balance Sheet - Assets"]);
+        const df2 = XLSX.utils.sheet_to_json(workbook.Sheets["Balance Sheet - L&E"]);
+        const df3 = XLSX.utils.sheet_to_json(workbook.Sheets["Income Statement"]);
 
-    if (file) {
-      const fileExtension = file.name.split(".").pop();
-      if (fileExtension === "csv") {
-        Papa.parse(file, {
-          header: true,
-          complete: (results) => {
-            processData(results.data);
-          },
-        });
-      } else if (fileExtension === "xlsx" || fileExtension === "xls") {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const workbook = XLSX.read(e.target.result, { type: "binary" });
-          const sheetName = workbook.SheetNames[0];
-          const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-          processData(data);
-        };
-        reader.readAsBinaryString(file);
-      } else {
-        alert("Invalid file type. Please upload a CSV or Excel file.");
+        calculateZScore(df1, df2, df3);
+      } catch (err) {
+        setError("❌ Error reading sheets. Make sure sheet names are correct.");
+        console.error(err);
       }
-    }
+    };
+
+    reader.readAsArrayBuffer(file);
   };
 
-  const processData = async (data) => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Session expired. Please log in again.");
-      navigate("/login");
+  const findValue = (data, key, colName) => {
+    const row = data.find((row) => row[colName]?.trim().toLowerCase() === key.toLowerCase());
+    return row ? parseFloat(row["Amount (₹ Crores)"] || 0) : 0;
+  };
+
+  const calculateZScore = (df1, df2, df3) => {
+    setError("");
+
+    const totalCurrentAssets = findValue(df1, "Total Current Assets", "Assets");
+    const totalAssets = findValue(df1, "Total Assets", "Assets");
+    const accountsPayable = findValue(df2, "Accounts Payable", "Liabilities & Equity");
+    const shortTermDebt = findValue(df2, "Short-Term Debt", "Liabilities & Equity");
+    const retainedEarnings = findValue(df2, "Retained Earnings", "Liabilities & Equity");
+    const marketEquity = findValue(df2, "Common Stock (Market)", "Liabilities & Equity");
+    const totalLiabilities = findValue(df2, "Total Liabilities", "Liabilities & Equity");
+    const ebit = findValue(df3, "EBIT (Operating Profit)", "Income Statement");
+    const sales = findValue(df3, "Revenue (Sales)", "Income Statement");
+
+    if (!totalAssets || !totalLiabilities) {
+      setError("❌ Missing Total Assets or Total Liabilities. Please check your data.");
       return;
     }
 
-    const processedData = data.map((item) => ({
-      cashFlow: parseFloat(item["CashFlow"]),
-      revenue: parseFloat(item["Revenue"]),
-      expenses: parseFloat(item["Expenses"]),
-      debtToEquityRatio: parseFloat(item["DebtToEquityRatio"]),
-    }));
+    const X1 = (totalCurrentAssets - (accountsPayable + shortTermDebt)) / totalAssets;
+    const X2 = retainedEarnings / totalAssets;
+    const X3 = ebit / totalAssets;
+    const X4 = marketEquity / totalLiabilities;
+    const X5 = sales / totalAssets;
 
-    try {
-      const response = await fetch("http://localhost:8000/api/financialPulse", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(processedData),
-      });
+    const Z = 1.2 * X1 + 1.4 * X2 + 3.3 * X3 + 0.6 * X4 + 1.0 * X5;
+    const percent = Math.round((Math.min(Z, 4.0) / 4.0) * 100 * 100) / 100;
 
-      const result = await response.json();
-      if (response.ok) {
-        setHealthScore(result.healthScores[0]);
-        setFinancialData(processedData);
-      } else {
-        console.error("Error analyzing financial health:", result.message);
-        alert("Error processing data. Please try again.");
-      }
-    } catch (error) {
-      console.error("Error connecting to backend:", error);
-      alert("Server error. Please try again later.");
-    }
+    let msg = "";
+    if (Z > 2.99) msg = "✅ Safe Zone – Company is financially healthy.";
+    else if (Z >= 1.81) msg = "⚠️ Grey Zone – Moderate financial risk.";
+    else msg = "❌ Distress Zone – High financial risk.";
+
+    setScore(Z.toFixed(2));
+    setPercentScore(percent);
+    setMessage(msg);
   };
 
   return (
-    <div className="flex h-screen bg-gray-100 min-h-screen">
-      <Explorenav />
-      <div className="ml-80 w-full mr-8 mt-7 bg-white rounded-lg shadow-md p-5 relative overflow-hidden">
-        <p className="text-2xl text-green-600 font-semibold">Financial Pulse</p>
-        <p className="mt-2 text-gray-600">
-          Assess Financial Health With Financial Pulse, Monitor Key Metrics to Maintain a Healthy Business
-        </p>
-        {healthScore && (
-          <div className="mt-6">
-            <p className="text-sm text-gray-600">Financial Health Score:</p>
-            <ResponsiveContainer width="50%" height={200}>
-              <RadialBarChart innerRadius="50%" outerRadius="100%" data={[{ name: "Health Score", value: healthScore }]}>
-                <RadialBar minAngle={15} background dataKey="value" fill="#82ca9d" />
-              </RadialBarChart>
-            </ResponsiveContainer>
-            <p className="text-3xl font-bold text-center">{healthScore}/100</p>
-          </div>
-        )}
-        <div className="absolute top-24 right-9">
-          <button onClick={handleClick} className="p-3 bg-green-500 font-semibold text-white rounded-lg hover:bg-green-600">
-            Upload Excel File
-          </button>
-          <input type="file" accept=".xlsx, .xls, .csv" ref={fileInputRef} onChange={handleFileUpload} style={{ display: "none" }} />
-          {fileName && <p className="mt-2 text-sm text-gray-600">Uploaded: {fileName}</p>}
+    <div style={{ fontFamily: "Arial", padding: "30px", maxWidth: "600px", margin: "auto" }}>
+      <h2>📈 Altman Z-score Calculator (React)</h2>
+      <input type="file" accept=".xlsx, .xls" onChange={handleFileUpload} />
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
+      {score && (
+        <div style={{ marginTop: "20px", padding: "15px", border: "1px solid #ccc" }}>
+          <h3>Z-score: {score}</h3>
+          <p>Financial Health (0–100): <strong>{percentScore}%</strong></p>
+          <p><em>{message}</em></p>
         </div>
-        {financialData.length > 0 && (
-          <div className="mt-8">
-            <h3 className="text-xl font-bold">Financial Metrics</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={financialData}>
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="cashFlow" fill="#82ca9d" />
-                <Bar dataKey="revenue" fill="#8884d8" />
-                <Bar dataKey="expenses" fill="#d88488" />
-                <Bar dataKey="debtToEquityRatio" fill="#d8b888" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
-};
+}
 
 export default Pulse;
