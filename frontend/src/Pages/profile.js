@@ -23,6 +23,7 @@ export default function Profile() {
   const [businessName, setBusinessName] = useState(["loading..."]);
   const [servicesDescription, setServiceDescription] = useState(["loading..."]);
   const [businessDomain, setBusinessDomain] = useState(["loading..."]);
+  const [businessLogo, setBusinessLogo] = useState("")
 
   const userId = jwtDecode(localStorage.getItem("token"))?.id;
 
@@ -38,6 +39,7 @@ export default function Profile() {
     })
       .then((response) => response.json())
       .then((data) => {
+        console.log(data)
         setBusinessTitle(data.businessTitle || "No Title");
         setBusinessLocation(data.businessLocation || "No Location");
         setAboutUs(data.businessDescription || "No About Us Info Available");
@@ -47,6 +49,7 @@ export default function Profile() {
         setBusinessName(data.businessName || "No name");
         setServiceDescription(data.servicesDescription || "No services description");
         setBusinessDomain(data.collaborationInterests || "No collaborations interests");
+        setBusinessLogo(data.businessLogo)
       })
       .catch((error) => console.error("Error fetching profile:", error));
   }, []);
@@ -75,7 +78,7 @@ export default function Profile() {
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <img
-                src={companylogo}
+                src={`http://localhost:8000/static/${businessLogo}`}
                 className="w-28 h-28 rounded-full border-gray-200 border shadow-lg"
               />
               <div className="ml-6">
@@ -124,19 +127,19 @@ export default function Profile() {
 
           {/* About Us Section */}
           <div ref={aboutUsRef} className="py-12 px-6 md:px-16 flex flex-col md:flex-row items-start gap-6">
-          {/* Left Column: Title & Image */}
-          <div className="md:w-1/2 w-full">
-            <p className="text-green-600 font-semibold uppercase tracking-wider">— About Us</p>
-            <h2 className="text-3xl font-extrabold text-gray-900 mt-2">Get to Know Our Business</h2>
-            <img src={aboutImage} className="w-full rounded-lg shadow-lg mt-6" alt="About Us" />
-          </div>
+            {/* Left Column: Title & Image */}
+            <div className="md:w-1/2 w-full">
+              <p className="text-green-600 font-semibold uppercase tracking-wider">— About Us</p>
+              <h2 className="text-3xl font-extrabold text-gray-900 mt-2">Get to Know Our Business</h2>
+              <img src={aboutImage} className="w-full rounded-lg shadow-lg mt-6" alt="About Us" />
+            </div>
 
-          {/* Right Column: Text Content */}
-          <div className=" w-full self-center">
-            <p className="text-gray-700 text-lg leading-relaxed">
-              {aboutUs}
-            </p>
-          </div>
+            {/* Right Column: Text Content */}
+            <div className=" w-full self-center">
+              <p className="text-gray-700 text-lg leading-relaxed">
+                {aboutUs}
+              </p>
+            </div>
 
           </div>
 
