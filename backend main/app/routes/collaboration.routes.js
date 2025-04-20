@@ -15,6 +15,4 @@ router.get("/:id", collaborationController.getCollaborationById);
 
 router.delete("/delete/:collabId", [authJwt.verifyToken], collaborationController.deleteCollaboration);
 
-router.delete("/delete/:collabId", collaborationController.deleteCollaboration);
-
 module.exports = router;

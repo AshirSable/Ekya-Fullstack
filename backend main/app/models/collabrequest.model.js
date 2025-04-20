@@ -1,23 +1,30 @@
 module.exports = (sequelize, DataTypes) => {
   const CollaborationRequest = sequelize.define("CollaborationRequest", {
-    username: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    projectTitle: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
     ownerId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+    },
+    senderUsername: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    collaborationTitle: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    status: {
+      type: DataTypes.STRING,
+      defaultValue: "pending",
+    },
+    isSenderNotification: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    receiverName: {
+      type: DataTypes.STRING,
+      allowNull: true,
     }
   });
-
-  // Associations
-  CollaborationRequest.associate = (models) => {
-    CollaborationRequest.belongsTo(models.User, { foreignKey: "ownerId" });
-  };
 
   return CollaborationRequest;
 };

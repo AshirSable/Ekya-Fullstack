@@ -1,33 +1,17 @@
 const express = require("express");
 const router = express.Router();
-const { CollaborationRequest } = require("../models");
+const collaborationRequestController = require("../controllers/collaborationrequest.controller");
 
-// Route to handle sending collaboration request
-router.post("/", async (req, res) => {
-  const { username, projectTitle, ownerId } = req.body;
+// ✅ Route to send a collaboration request
+router.post("/", collaborationRequestController.createRequest);
 
-  if (!username || !projectTitle || !ownerId) {
-    return res.status(400).json({ error: "Missing required fields" });
-  }
+// ✅ Route to get collaboration requests for a specific user
+router.get("/notifications/:ownerId", collaborationRequestController.getUserRequests);
 
-  try {
-    const newRequest = await CollaborationRequest.create({
-      username,
-      projectTitle,
-      ownerId,
-    });
+// ✅ Route to update collaboration request status
+router.put("/:requestId", collaborationRequestController.updateRequestStatus);
 
-    res.status(201).json({
-      message: "Collaboration request sent successfully",
-      request: newRequest,
-    });
-  } catch (error) {
-    console.error("Error creating collaboration request:", error);
-    res.status(500).json({
-      error: "Failed to send collaboration request",
-      details: error.message,
-    });
-  }
-});
+// ✅ Route to delete a collaboration request
+router.delete("/:requestId", collaborationRequestController.deleteRequest);
 
 module.exports = router;

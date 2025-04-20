@@ -4,12 +4,14 @@ const db = require("../models");
 const { verifyToken } = require("../middleware/authJwt");
 const { BearerToken } = require("../utils/common");
 const jwt = require('jsonwebtoken');
-const { updateProfile, getProfile } = require("../controllers/profile.controller");
+const { updateProfile, getProfile, getProfileById } = require("../controllers/profile.controller");
 
 // Update profile API
 router.put("/:userId", [verifyToken], updateProfile)
 
 router.get("/:userId", [verifyToken], getProfile)
+
+router.get("/profile/:id", getProfileById); 
     
     
 //     async (req, res) => {
