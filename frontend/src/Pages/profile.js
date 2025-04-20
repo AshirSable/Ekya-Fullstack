@@ -22,7 +22,7 @@ export default function Profile() {
   const [businessName, setBusinessName] = useState(["loading..."]);
   const [servicesDescription, setServiceDescription] = useState(["loading..."]);
   const [businessDomain, setBusinessDomain] = useState(["loading..."]);
-  const [businessLogo, setBusinessLogo] = useState("");
+  const [businessLogo, setBusinessLogo] = useState("")
 
   const userId = jwtDecode(localStorage.getItem("token"))?.id;
 
@@ -38,6 +38,7 @@ export default function Profile() {
     })
       .then((response) => response.json())
       .then((data) => {
+        console.log(data)
         setBusinessTitle(data.businessTitle || "No Title");
         setBusinessLocation(data.businessLocation || "No Location");
         setAboutUs(data.businessDescription || "No About Us Info Available");
@@ -47,7 +48,7 @@ export default function Profile() {
         setBusinessName(data.businessName || "No name");
         setServiceDescription(data.servicesDescription || "No services description");
         setBusinessDomain(data.collaborationInterests || "No collaborations interests");
-        setBusinessLogo(data.businessLogo || "");
+        setBusinessLogo(data.businessLogo)
       })
       .catch((error) => console.error("Error fetching profile:", error));
   }, []);
@@ -76,7 +77,7 @@ export default function Profile() {
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <img
-                src={businessLogo || aboutImage} // fallback if logo is not available
+                src={`http://localhost:8000/static/${businessLogo}`}
                 className="w-28 h-28 rounded-full border-gray-200 border shadow-lg"
                 alt="Business Logo"
               />

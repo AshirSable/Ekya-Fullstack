@@ -40,6 +40,7 @@ exports.createProfile = async (req, res) => {
     const { userId } = req.body;
 
     // Check if a profile already exists
+    console.log(req)
     const existingProfile = await Profile.findOne({ where: { userId } });
     if (existingProfile) {
       return res.status(400).json({ message: "Profile already exists" });
@@ -62,13 +63,16 @@ exports.updateProfile = async (req, res) => {
   try {
     const { userId } = req.params;
     const profileData = req.body;
+    console.log(req.body)
+
 
     let profile = await Profile.findOne({ where: { userId } });
 
     if (!profile) {
       profile = await Profile.create({ ...profileData, userId });
     } else {
-      await profile.update(profileData);
+      const businesslogoname = req.files.businessLogo[0]?.filename
+      await profile.update({ ...profileData, "businessLogo": businesslogoname });
     }
 
     res.status(200).json({ message: "Profile updated successfully!", profile });

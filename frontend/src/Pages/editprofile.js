@@ -15,11 +15,10 @@ export default function EditProfile() {
     businessTitle: "",
     businessDescription: "",
     businessCoreValues: "",
-    businessImage: null,
+    businessImage: "",
     aboutTitle: "",
-    servicesTitle: "",
     servicesDescription: "",
-    servicesHeroImage: null,
+    servicesHeroImage: "",
     businessDomain: "",
     preferredCollaborationSectors: [],
     collaborationInterests: [],
@@ -32,12 +31,8 @@ export default function EditProfile() {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
       .then((res) => {
-        setFormData({
-          ...formData,
-          ...res.data,
-          milestones: res.data.milestones || [],
-          collaborationInterests: res.data.collaborationInterests || [],
-        });
+        console.log(res)
+        setFormData({ ...res.data, milestones: res.data.milestones || [], collaborationInterests: res.data.collaborationInterests || [] })
       })
       .catch((error) => console.error("Error fetching profile:", error));
   }, []);
@@ -47,7 +42,11 @@ export default function EditProfile() {
   };
 
   const handleFileChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.files[0] });
+    console.log(e.target)
+    console.log(e.target.name)
+    const updatedForm = { ...formData, [e.target.name]: e.target.files[0] }
+    setFormData(updatedForm);
+    console.log(updatedForm)
   };
 
   const handleMilestoneChange = (index, field, value) => {
@@ -83,10 +82,11 @@ export default function EditProfile() {
     });
 
     axios
-      .put(`http://localhost:8000/api/profile/${userId}`, formDataToSend, {
+      .put(`http://localhost:8000/api/profile/${userId}`, formData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "multipart/form-data",
+
+          "Content-Type": "multipart/form-data"
         },
       })
       .then(() => navigate("/profile"))
@@ -98,18 +98,18 @@ export default function EditProfile() {
       <div className="w-[20%] fixed h-full">
         <Explorenav />
       </div>
+      <div>
 
-      <div className="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md ml-[22%]">
+      </div>
+      <div className="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
         <h1 className="text-2xl font-bold text-center mb-6">Customize Your Business’s Profile</h1>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Business Details */}
           <div className="border-b pb-4">
             <h2 className="text-lg font-semibold text-center">Business Details</h2>
             <input type="text" name="businessName" value={formData.businessName} onChange={handleChange} placeholder="Business Name" className="border p-2 w-full rounded" />
             <input type="file" name="businessLogo" onChange={handleFileChange} className="w-full" />
           </div>
 
-          {/* About */}
           <div className="border-b pb-4">
             <h2 className="text-lg font-semibold text-center">About Your Business</h2>
             <input type="text" name="aboutTitle" value={formData.aboutTitle} onChange={handleChange} placeholder="Title" className="border p-2 w-full rounded" />
@@ -118,15 +118,13 @@ export default function EditProfile() {
             <input type="file" name="businessImage" onChange={handleFileChange} className="w-full" />
           </div>
 
-          {/* Services */}
           <div className="border-b pb-4">
             <h2 className="text-lg font-semibold text-center">Our Services</h2>
-            <input type="text" name="servicesTitle" value={formData.servicesTitle} onChange={handleChange} placeholder="Service Title" className="border p-2 w-full rounded" />
+            <input type="text" name="servicesTitle" value={formData.servicesTitle} onChange={handleChange} placeholder="About Title" className="border p-2 w-full rounded" />
             <textarea name="servicesDescription" value={formData.servicesDescription} onChange={handleChange} placeholder="Services Description" className="border p-2 w-full rounded"></textarea>
             <input type="file" name="servicesHeroImage" onChange={handleFileChange} className="w-full" />
           </div>
 
-          {/* Collaboration */}
           <div className="border-b pb-4">
             <h2 className="text-lg font-semibold text-center">Collaboration Interests</h2>
             <select name="businessDomain" value={formData.businessDomain} onChange={handleChange} className="border p-2 w-full rounded">
@@ -136,11 +134,10 @@ export default function EditProfile() {
             </select>
           </div>
 
-          {/* Milestones */}
           <div>
             <h2 className="text-lg font-semibold text-center">Milestones and Achievements</h2>
             {formData.milestones.map((milestone, index) => (
-              <div key={index} className="flex flex-col gap-2 mb-4">
+              <div key={index} className="flex items-center space-x-2">
                 <input type="text" value={milestone.text} onChange={(e) => handleMilestoneChange(index, "text", e.target.value)} placeholder="Write an achievement" className="border p-2 w-full rounded" />
                 <input type="file" onChange={(e) => handleMilestoneChange(index, "image", e.target.files[0])} className="w-full" />
               </div>
@@ -148,7 +145,6 @@ export default function EditProfile() {
             <button type="button" onClick={addMilestone} className="bg-green-500 text-white px-4 py-2 rounded w-full">Add</button>
           </div>
 
-          {/* Submit */}
           <div className="flex justify-between">
             <button type="button" className="border px-4 py-2 rounded text-gray-600">Later</button>
             <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded">Update</button>

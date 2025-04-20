@@ -2,18 +2,19 @@ const express = require("express");
 const router = express.Router();
 const db = require("../models");
 const { verifyToken } = require("../middleware/authJwt");
+const upload = require("../middleware/upload");
 const { BearerToken } = require("../utils/common");
 const jwt = require('jsonwebtoken');
 const { updateProfile, getProfile, getProfileById } = require("../controllers/profile.controller");
 
 // Update profile API
-router.put("/:userId", [verifyToken], updateProfile)
+router.put("/:userId", [verifyToken, upload.fields([{ name: "businessLogo" }])], updateProfile)
 
 router.get("/:userId", [verifyToken], getProfile)
 
-router.get("/profile/:id", getProfileById); 
-    
-    
+router.get("/profile/:id", getProfileById);
+
+
 //     async (req, res) => {
 //   try {
 //     const profile = await db.profile.findOne({ where: { userId: req.params.userId } });
