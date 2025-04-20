@@ -12,13 +12,13 @@ const collaborationRequestController = require("./app/controllers/collaborationr
 const collaborationRequestRoutes = require("./app/routes/collaborationrequest.routes");
 const uploadRoutes = require('./app/routes/upload.routes');
 const ongoingRoutes = require("./app/routes/ongoingcollab.routes");
-
+const path = require("path")
 const app = express();
 
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use('/api/upload', uploadRoutes);
+app.use('/static', express.static(path.join(__dirname, '/uploads')));
 
 db.sequelize.sync()
   .then(() => {

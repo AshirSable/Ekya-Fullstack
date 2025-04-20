@@ -33,7 +33,7 @@ exports.getUserRequests = async (req, res) => {
 
   try {
     const requests = await CollaborationRequest.findAll({
-      where: { 
+      where: {
         ownerId,
         status: { [db.Sequelize.Op.not]: "rejected" }  // ✅ Exclude rejected requests
       },
