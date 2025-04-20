@@ -17,7 +17,8 @@ const CollabDetails = () => {
   const collaborationsRef = useRef(null);
   const milestonesRef = useRef(null);
 
-  console.log("Logged-in username:", username);
+  console.log("Sending Request With:");
+  
 
    useEffect(() => {
     // Fetch Collaboration Details
@@ -42,16 +43,17 @@ const CollabDetails = () => {
 
   // Function to Handle Request Submission
   const handleRequest = async () => {
-    if (!collabDetails.user.id || !username || !collabDetails.title) {
+  
+    if (!collabDetails.userId || !username || !collabDetails.title) {
       alert("Error: Missing required data for request.");
       return;
     }
   
     try {
       const response = await axios.post(`http://localhost:8000/api/collaboration-request`, {
-        receiverId: collabDetails.user.id,    // Corrected field name
-        senderName: username,               // Ensure username is fetched correctly
-        projectTitle: collabDetails.title    // Collaboration project title
+        ownerId: collabDetails.userId,    // Corrected field name
+        senderUsername: username,               // Ensure username is fetched correctly
+        collaborationTitle: collabDetails.title    // Collaboration project title
       });
   
       alert(`Request sent successfully to ${collabDetails.user?.profile?.businessName}`);
