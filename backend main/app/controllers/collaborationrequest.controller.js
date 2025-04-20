@@ -1,17 +1,19 @@
 const db = require("../models");
 const CollaborationRequest = db.CollaborationRequest;
+const OngoingCollab = db.OngoingCollab;
 
 // ✅ Create a new collaboration request
 exports.createRequest = async (req, res) => {
-  const { ownerId, senderUsername, collaborationTitle } = req.body;
+  const { ownerId, senderUsername, collaborationTitle, senderId } = req.body;
 
-  if (!ownerId || !senderUsername || !collaborationTitle) {
+  if (!ownerId || !senderUsername || !collaborationTitle || !senderId) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
     const request = await CollaborationRequest.create({
       ownerId,
+      senderId,
       senderUsername,
       collaborationTitle,
       status: "pending",
@@ -33,10 +35,7 @@ exports.getUserRequests = async (req, res) => {
 
   try {
     const requests = await CollaborationRequest.findAll({
-      where: { 
-        ownerId,
-        status: { [db.Sequelize.Op.not]: "rejected" }  // ✅ Exclude rejected requests
-      },
+      where: { ownerId },
       order: [["createdAt", "DESC"]],
     });
 
@@ -51,7 +50,7 @@ exports.getUserRequests = async (req, res) => {
   }
 };
 
-// ✅ Update collaboration request status
+// ✅ Update collaboration request status and create OngoingCollab if accepted
 exports.updateRequestStatus = async (req, res) => {
   const { requestId } = req.params;
   const { status } = req.body;
@@ -66,15 +65,13 @@ exports.updateRequestStatus = async (req, res) => {
     request.status = status;
     await request.save();
 
-    // ✅ Create a Notification for the Sender if Accepted
     if (status === "accepted") {
-      await CollaborationRequest.create({
-        ownerId: request.senderId, // Sender gets a notification
+      await OngoingCollab.create({
+        ownerId: request.ownerId,
+        senderId: request.senderId,
         senderUsername: request.senderUsername,
         collaborationTitle: request.collaborationTitle,
-        status: "accepted",
-        isSenderNotification: true,
-        receiverName: request.receiverName, // Display receiver's name in the notification
+        status: "in-progress",
       });
     }
 
@@ -97,24 +94,9 @@ exports.deleteRequest = async (req, res) => {
     }
 
     await request.destroy();
-
     res.status(200).json({ message: "Request deleted successfully." });
   } catch (error) {
     console.error("Error deleting request:", error);
     res.status(500).json({ error: "Failed to delete request." });
   }
 };
-
-const OngoingCollab = db.OngoingCollaboration;
-
-if (status === "accepted") {
-  await OngoingCollab.create({
-    ownerId: request.ownerId,
-    collaboratorId: request.senderId,
-    projectTitle: request.collaborationTitle,
-    ownerName: ownerProfile.businessName,
-    collaboratorName: senderProfile.businessName,
-    ownerLogo: ownerProfile.businessLogo,
-    collaboratorLogo: senderProfile.businessLogo,
-  });
-}
