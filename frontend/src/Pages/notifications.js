@@ -8,8 +8,8 @@ export default function Notifications() {
   const [notifications, setNotifications] = useState([]);
   const navigate = useNavigate();
 
+  const userId = jwtDecode(localStorage.getItem("token"))?.id;
   useEffect(() => {
-    const userId = jwtDecode(localStorage.getItem("token"))?.id;
 
     if (!userId) {
       console.warn("⚠️ No userId found in localStorage.");
@@ -19,6 +19,7 @@ export default function Notifications() {
     axios
       .get(`http://localhost:8000/api/collaboration-request/notifications/${userId}`)
       .then((response) => {
+        console.log(response.data)
         setNotifications(response.data);
       })
       .catch((error) => {
@@ -27,29 +28,29 @@ export default function Notifications() {
   }, []);
 
   // ✅ Handle Accept Request
-// ✅ Handle Accept Request
-const handleAccept = async (requestId) => {
-  console.log(`🔍 Attempting to accept request ID: ${requestId}`); // ✅ Log requestId
-  try {
-    const response = await axios.put(
-      `http://localhost:8000/api/collaboration-request/${requestId}`,
-      { status: "accepted" }
-    );
-    
-    console.log("✅ Response from server:", response.data);  // ✅ Log server response
+  // ✅ Handle Accept Request
+  const handleAccept = async (requestId, senderId) => {
+    console.log(`🔍 Attempting to accept request ID: ${requestId}`); // ✅ Log requestId
+    try {
+      const response = await axios.put(
+        `http://localhost:8000/api/collaboration-request/${requestId}`,
+        { status: "accepted", senderId: senderId }
+      );
 
-    setNotifications((prevNotifications) =>
-      prevNotifications.map((notif) =>
-        notif.id === requestId ? { ...notif, status: "accepted" } : notif
-      )
-    );
+      console.log("✅ Response from server:", response.data);  // ✅ Log server response
 
-    alert("✅ Collaboration accepted successfully! Go to 'Ongoing Collaborations' page.");
-  } catch (error) {
-    console.error("❌ Error accepting request:", error.response?.data || error.message);
-    alert(`❌ Failed to accept the collaboration request: ${error.response?.data?.error || "Unknown error"}`);
-  }
-};
+      setNotifications((prevNotifications) =>
+        prevNotifications.map((notif) =>
+          notif.id === requestId ? { ...notif, status: "accepted" } : notif
+        )
+      );
+
+      alert("✅ Collaboration accepted successfully! Go to 'Ongoing Collaborations' page.");
+    } catch (error) {
+      console.error("❌ Error accepting request:", error.response?.data || error.message);
+      alert(`❌ Failed to accept the collaboration request: ${error.response?.data?.error || "Unknown error"}`);
+    }
+  };
 
 
   // ✅ Handle Reject Request
@@ -110,7 +111,7 @@ const handleAccept = async (requestId) => {
                 <div className="flex space-x-3 mt-3">
                   <button
                     className="bg-green-500 text-white px-4 py-2 rounded"
-                    onClick={() => handleAccept(notif.id)}
+                    onClick={() => handleAccept(notif.id, notif.senderId)}
                   >
                     Accept
                   </button>

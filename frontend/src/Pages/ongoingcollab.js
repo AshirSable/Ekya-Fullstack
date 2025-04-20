@@ -10,7 +10,7 @@ function OngoingCollab() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:8000/api/ongoing-collaborations/${userId}`)
+      .get(`http://localhost:8000/api/ongoing/${userId}`)
       .then((res) => {
         setCollaborations(res.data);
       })
@@ -21,7 +21,7 @@ function OngoingCollab() {
 
   const handleStatusToggle = async (collabId) => {
     try {
-      await axios.put(`http://localhost:8000/api/ongoing-collaborations/status/${collabId}`, {
+      await axios.put(`http://localhost:8000/api/ongoing/status/${collabId}`, {
         userId,
       });
       setCollaborations((prev) =>
@@ -75,9 +75,8 @@ function OngoingCollab() {
                   2 Months
                 </span>
                 <span
-                  className={`inline-flex items-center px-4 py-1 text-sm font-medium text-white rounded-full capitalize ${
-                    collab.status === "completed" ? "bg-green-600" : "bg-yellow-500"
-                  }`}
+                  className={`inline-flex items-center px-4 py-1 text-sm font-medium text-white rounded-full capitalize ${collab.status === "completed" ? "bg-green-600" : "bg-yellow-500"
+                    }`}
                 >
                   {collab.status}
                 </span>
