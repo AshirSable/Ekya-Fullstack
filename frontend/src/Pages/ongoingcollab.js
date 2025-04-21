@@ -1,125 +1,173 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Explorenav from "../components/loginnav";
-import TopBar from "../components/topbar";
-import axios from "axios";
-import { jwtDecode } from "jwt-decode";
 
-function OngoingCollab() {
-  const [collaborations, setCollaborations] = useState([]);
-  const userId = jwtDecode(localStorage.getItem("token"))?.id;
+const OngoingCollab = () => {
+  const [tasks, setTasks] = useState([]);
+  const [newTask, setNewTask] = useState("");
+  const [activeTab, setActiveTab] = useState("work");
 
-  useEffect(() => {
-    axios
-      .get(`http://localhost:8000/api/ongoing/${userId}`)
-      .then((res) => {
-        setCollaborations(res.data);
-      })
-      .catch((err) => {
-        console.error("❌ Error fetching ongoing collaborations:", err);
-      });
-  }, [userId]);
-
-  const handleStatusToggle = async (collabId) => {
-    try {
-      await axios.put(`http://localhost:8000/api/ongoing/status/${collabId}`, {
-        userId,
-      });
-      setCollaborations((prev) =>
-        prev.map((item) => {
-          if (item.id === collabId) {
-            const ownerCompleted =
-              userId === item.ownerId ? true : item.ownerCompleted;
-            const collaboratorCompleted =
-              userId === item.collaboratorId ? true : item.collaboratorCompleted;
-            const status = ownerCompleted && collaboratorCompleted ? "completed" : "in-progress";
-            return {
-              ...item,
-              ownerCompleted,
-              collaboratorCompleted,
-              status,
-            };
-          }
-          return item;
-        })
-      );
-    } catch (error) {
-      console.error("❌ Error updating status:", error);
+  const handleAddTask = () => {
+    if (newTask.trim()) {
+      setTasks([...tasks, { id: Date.now(), text: newTask, done: false }]);
+      setNewTask("");
     }
   };
 
+  const toggleTask = (id) => {
+    setTasks(
+      tasks.map((task) =>
+        task.id === id ? { ...task, done: !task.done } : task
+      )
+    );
+  };
+
+  const deleteTask = (id) => {
+    setTasks(tasks.filter((task) => task.id !== id));
+  };
+
   return (
-    <div className="flex h-screen overflow-hidden">
-      <div className="w-64 bg-gray-800">
-        <Explorenav />
-      </div>
+    <div className="flex min-h-screen bg-[#f4f4f4]">
+      <Explorenav />
 
-      <div className="flex-1 p-5 ml-6 overflow-y-auto">
-        <TopBar />
-        {collaborations.map((collab, index) => {
-          const isOwner = userId === collab.ownerId;
-          const partnerName = isOwner ? collab.collaboratorName : collab.ownerName;
-          const partnerLogo = isOwner ? collab.collaboratorLogo : collab.ownerLogo;
-
-          return (
-            <div
-              key={index}
-              className="w-full h-60 rounded-lg relative overflow-hidden shadow-md p-6 mb-6 bg-white"
-            >
-              <h1 className="text-xl font-bold text-black">{collab.projectTitle}</h1>
-              <h3 className="text-md text-gray-500 mt-1">
-                A collaboration on: {collab.projectTitle}
-              </h3>
-
+      <div className="max-w-6xl w-full p-6 ml-72">
+        <div className="bg-white rounded-3xl shadow-lg border p-8 space-y-8">
+          {/* Header Section */}
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800">
+                Pitchdeck Presentation
+              </h1>
+              <p className="text-sm text-gray-500 mt-1">
+                A collaboration on: pitchdeck presentation
+              </p>
               <div className="flex gap-3 mt-3">
-                <span className="inline-flex items-center px-4 py-1 text-sm font-medium text-gray-600 bg-gray-200 rounded-full">
+                <span className="bg-gray-200 text-gray-800 text-xs font-medium px-3 py-1 rounded-full">
                   2 Months
                 </span>
-                <span
-                  className={`inline-flex items-center px-4 py-1 text-sm font-medium text-white rounded-full capitalize ${collab.status === "completed" ? "bg-green-600" : "bg-yellow-500"
-                    }`}
-                >
-                  {collab.status}
+                <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-3 py-1 rounded-full">
+                  In-Progress
                 </span>
               </div>
+            </div>
+          </div>
 
-              <img
-                src={collab.ownerLogo || "/assets/defaultlogo.png"}
-                className="absolute bottom-0 left-0 w-28 h-auto object-cover"
-                alt="Owner Logo"
-              />
+          {/* Completion Checkbox */}
+          <div>
+            <label className="inline-flex items-center gap-2 text-sm text-gray-600">
+              <input type="checkbox" className="accent-green-500" />
+              Mark as Completed (Both collaborators must mark it)
+            </label>
+          </div>
 
-              <img
-                src={partnerLogo || "/assets/defaultlogo.png"}
-                className="absolute top-1/2 right-9 transform -translate-y-1/2 w-28 h-auto object-cover"
-                alt="Partner Logo"
-              />
+          {/* Tabs */}
+          <div className="flex gap-4 border-b pb-2">
+            <button
+              onClick={() => setActiveTab("work")}
+              className={`px-4 py-2 rounded-full text-sm font-medium ${
+                activeTab === "work"
+                  ? "bg-green-100 text-green-700"
+                  : "bg-gray-100 text-gray-600"
+              }`}
+            >
+              Work Status
+            </button>
+            <button
+              onClick={() => setActiveTab("legal")}
+              className={`px-4 py-2 rounded-full text-sm font-medium ${
+                activeTab === "legal"
+                  ? "bg-gray-200 text-gray-800"
+                  : "bg-gray-100 text-gray-600"
+              }`}
+            >
+              Terms & Conditions
+            </button>
+          </div>
 
-              <h1 className="absolute bottom-4 right-6 text-lg font-normal text-gray-600">
-                Collaborating with {partnerName}
-              </h1>
+          {/* Tab Content */}
+          {activeTab === "work" && (
+            <div>
+              <h2 className="text-xl font-semibold text-gray-700 mb-4">
+                📝 Shared Task List
+              </h2>
 
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={
-                      (isOwner && collab.ownerCompleted) ||
-                      (!isOwner && collab.collaboratorCompleted)
-                    }
-                    onChange={() => handleStatusToggle(collab.id)}
-                    className="w-4 h-4"
-                  />
-                  <span className="text-sm text-gray-700">
-                    Mark as Completed (Both collaborators must mark it)
-                  </span>
+              <div className="flex gap-2 mb-4">
+                <input
+                  type="text"
+                  value={newTask}
+                  onChange={(e) => setNewTask(e.target.value)}
+                  placeholder="Enter a new task..."
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  onClick={handleAddTask}
+                  className="bg-blue-600 text-white px-5 py-2 rounded-xl hover:bg-blue-700 transition duration-150"
+                >
+                  Add
+                </button>
+              </div>
+
+              <ul className="space-y-3">
+                {tasks.map((task) => (
+                  <li
+                    key={task.id}
+                    className="flex items-center justify-between bg-gray-100 px-4 py-2 rounded-xl border"
+                  >
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={task.done}
+                        onChange={() => toggleTask(task.id)}
+                        className="accent-blue-600"
+                      />
+                      <span
+                        className={`${
+                          task.done
+                            ? "line-through text-gray-400"
+                            : "text-gray-700"
+                        }`}
+                      >
+                        {task.text}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => deleteTask(task.id)}
+                      className="text-red-500 hover:text-red-700 text-lg"
+                    >
+                      ×
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {activeTab === "legal" && (
+            <div>
+              <h2 className="text-xl font-semibold text-gray-700 mb-2">
+                📄 Legal Assistance
+              </h2>
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-gray-500">Owner</span>
+                <a
+                  href="/sample-legal-agreement.pdf"
+                  download
+                  className="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm font-medium"
+                >
+                  Download Collaboration Agreement
+                </a>
+              </div>
+              <div className="mt-4">
+                <label className="inline-flex items-center gap-2 text-sm text-gray-600">
+                  <input type="checkbox" className="accent-green-500" />
+                  Mark as Completed (Both collaborators must mark it)
                 </label>
               </div>
             </div>
-          );
-        })}
+          )}
+        </div>
       </div>
     </div>
   );
-}
+};
 
 export default OngoingCollab;

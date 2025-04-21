@@ -22,6 +22,7 @@ db.user = require("./user.model.js")(sequelize, DataTypes);
 db.role = require("./role.model.js")(sequelize, DataTypes);
 db.collaboration = require("./collaboration.model.js")(sequelize, DataTypes);
 db.profile = require("./profile.model.js")(sequelize, DataTypes);
+db.task = require("./task.model.js")(sequelize, DataTypes); 
 
 // Collaboration Request Model
 db.CollaborationRequest = require("./collabrequest.model.js")(sequelize, DataTypes);
@@ -36,6 +37,9 @@ db.collaboration.belongsTo(db.user, { foreignKey: "userId" });
 
 db.user.hasMany(db.CollaborationRequest, { foreignKey: "ownerId" });
 db.CollaborationRequest.belongsTo(db.user, { foreignKey: "ownerId" });
+
+db.OngoingCollaborations.hasMany(db.task, { foreignKey: "collabId" });
+db.task.belongsTo(db.OngoingCollaborations, { foreignKey: "collabId" });
 
 // Sync all models directly
 db.sequelize.sync({ alter: true })  // 🔥 Creates or updates tables based on model definitions

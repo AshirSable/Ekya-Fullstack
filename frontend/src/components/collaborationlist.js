@@ -27,11 +27,11 @@ const CollaborationsList = () => {
             onClick={() => navigate(`/collabdetails/${collab.id}`)} // Pass ID to details page
           >
             <div className="flex justify-center items-center mb-4 h-[12vh]">
-              <img
-                src={collab.image || googleLogo}
-                alt={collab.title}
-                className="object-contain h-full"
-              />
+            <img
+              src={`http://localhost:8000/static/${collab.user?.profile?.businessLogo}` || googleLogo}
+              alt={collab.title}
+              className="object-contain h-full"
+            />
             </div>
             <hr />
             <h4 className="font-semibold mb-2 mt-4">{collab.title}</h4>

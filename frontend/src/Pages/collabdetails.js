@@ -94,11 +94,15 @@ const CollabDetails = () => {
 
           {/* Company Info */}
           <div className="flex items-center mt-6">
-            <img
-              src={companylogo}
-              alt="Company Logo"
-              className="w-16 h-16 rounded-full border border-gray-300"
-            />
+          <img
+            src={
+              collabDetails.user?.profile?.businessLogo
+                ? `http://localhost:8000/static/${collabDetails.user.profile.businessLogo}`
+                : "/assets/defaultlogo.png"
+            }
+            alt="Business Logo"
+            className="w-16 h-16 rounded-full border border-gray-300 object-cover"
+          />
             <h2 className="ml-4 text-xl font-semibold text-gray-800">
               {collabDetails.user?.profile?.businessName || "Unknown Company"}
             </h2>
